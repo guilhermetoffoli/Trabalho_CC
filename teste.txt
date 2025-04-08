@@ -1,7 +1,4 @@
-          programa
-char     
-int
-float
-
-
-<
+<   >
+   :=
+if
+{%

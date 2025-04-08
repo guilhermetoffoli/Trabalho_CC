@@ -14,14 +14,23 @@ const char* getTipoTokenName(TipoToken tipo) {
         case TOKEN_TIPO: return "TIPO";
         case TOKEN_THEN: return "THEN";
         case TOKEN_IF: return "IF";
+        case TOKEN_ELSE: return "ELSE";
         case TOKEN_ELSEIF: return "ELSEIF";
         case TOKEN_WHILE: return "WHILE";
         case TOKEN_DO: return "DO";
         case TOKEN_RELOP: return "RELOP";
         case TOKEN_ARITOP: return "ARITOP";
+        case TOKEN_PARENTESES_D: return "PARÊNTESES DIREITO";
+        case TOKEN_PARENTESES_E: return "PARÊNTESES ESQUERDO";
+        case TOKEN_COLCHETE_D: return "COLCHETE DIREITO";
+        case TOKEN_COLCHETE_E: return "COLCHETE ESQUERDO";
+        case TOKEN_ABERTURA: return "ABERTURA";
         case TOKEN_FECHAMENTO: return "FECHAMENTO";
-        case TOKEN_P_VIRGULA: return "P_VIRGULA";
+        case TOKEN_D_PONTOS: return "DOIS PONTOS";
+        case TOKEN_P_VIRGULA: return "PONTO E VIRGULA";
         case TOKEN_VIRGULA: return "VIRGULA";
+        case TOKEN_ATRIB: return "ATRIBUIÇÃO";
+        case TOKEN_ID: return "ID";
         default: return "UNKNOWN_TOKEN";
     }
 }
