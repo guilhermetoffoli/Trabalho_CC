@@ -305,7 +305,7 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 else if (isspace(c)) {
                     token->posCol = al->posCol; // Ignora espaços
                     token->posRow = al->posRow;
-                    al->state = 102;
+                    //al->state = 102;
                 }
                 else if (isdigit(c)) {
                     al->state = 66; // Número inteiro
@@ -926,7 +926,6 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                     //erro
                 }
             case 102:
-                c = proxChar(al);
                 if (isspace(c)){
                     al->state = 102;
                 } else {
@@ -937,5 +936,6 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 // Restart();
                 // *token = criarToken(TOKEN_VIRGULA, null, al);
                 return 1;
+            }
         }
 }
