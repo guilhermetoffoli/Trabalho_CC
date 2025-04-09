@@ -1,9 +1,9 @@
-#include "symtable.h"
-#include "lexer.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
+#include "symtable.h"
+#include "token.h"
 #define INITIAL_CAPACITY 16
 
 SymTable* criarSymTable() {

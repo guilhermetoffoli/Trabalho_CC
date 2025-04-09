@@ -1,7 +1,7 @@
 #ifndef SYMTABLE_H
 #define SYMTABLE_H
 
-#include "lexer.h"
+#include "token.h"
 
 typedef enum {
     DT_INT, DT_FLOAT, DT_CHAR, DT_NULL

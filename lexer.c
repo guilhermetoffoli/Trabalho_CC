@@ -1,121 +1,11 @@
-#include "lexer.h"
-#include "symtable.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 
-const char* getTipoTokenName(TipoToken tipo) {
-    switch(tipo) {
-        case TOKEN_EOF: return "TOKEN_EOF";
-        case TOKEN_PROGRAMA: return "PROGRAMA";
-        case TOKEN_TIPO: return "TIPO";
-        case TOKEN_THEN: return "THEN";
-        case TOKEN_IF: return "IF";
-        case TOKEN_ELSE: return "ELSE";
-        case TOKEN_ELSEIF: return "ELSEIF";
-        case TOKEN_WHILE: return "WHILE";
-        case TOKEN_DO: return "DO";
-        case TOKEN_RELOP: return "RELOP";
-        case TOKEN_ARITOP: return "ARITOP";
-        case TOKEN_PARENTESES_D: return "PARÊNTESES DIREITO";
-        case TOKEN_PARENTESES_E: return "PARÊNTESES ESQUERDO";
-        case TOKEN_COLCHETE_D: return "COLCHETE DIREITO";
-        case TOKEN_COLCHETE_E: return "COLCHETE ESQUERDO";
-        case TOKEN_ABERTURA: return "ABERTURA";
-        case TOKEN_FECHAMENTO: return "FECHAMENTO";
-        case TOKEN_D_PONTOS: return "DOIS PONTOS";
-        case TOKEN_P_VIRGULA: return "PONTO E VIRGULA";
-        case TOKEN_VIRGULA: return "VIRGULA";
-        case TOKEN_ATRIB: return "ATRIBUIÇÃO";
-        case TOKEN_ID: return "ID";
-        default: return "UNKNOWN_TOKEN";
-    }
-}
-
-const char* getTipoAtributoName(TipoAtributo atributo) {
-    switch(atributo) {
-        case null: return "null";
-        case TOKEN_INT: return "TOKEN_INT";
-        case TOKEN_FLOAT: return "TOKEN_FLOAT";
-        case TOKEN_CHAR: return "TOKEN_CHAR";
-        case LE: return "MENOR_IGUAL";
-        case NE: return "DIFERENÇA";
-        case LT: return "MENOR_QUE";
-        case EQ: return "IGUAL";
-        case GE: return "MAIOR_IGUAL";
-        case GT: return "MAIOR_QUE";
-        case ADD: return "SOMA";
-        case SUB: return "SUBTRACAO";
-        case DIV: return "DIVISAO";
-        case EXP: return "EXPONENCIAL";
-        case MULT: return "MULTIPLICACAO";
-        default: return "UNKNOWN_ATTR";
-    }
-}
-
-// Função para imprimir um token
-void printToken(Token token) {
-    printf("<%s | %s |  coluna: %d | linha: %d> %s\n", getTipoTokenName(token.tipo_token), getTipoAtributoName(token.tipo_atributo), token.posCol, token.posRow, token.lexema);
-}
-
-// Função para liberar a memória de um token
-void freeToken(Token* token) {
-    if (token->lexema != NULL) {
-        free(token->lexema);
-        token->lexema = NULL;
-    }
-}
-
-// Função para criar um token
-Token criarToken(TipoToken tipo, TipoAtributo atributo, AnalisadorLexico* al) {
-    Token t;
-    t.tipo_token = tipo;
-    t.tipo_atributo = atributo;
-    t.posCol = al->posCol;
-    t.posRow = al->posRow;
-
-    if (al->lexema != NULL) {
-        t.lexema = strdup(al->lexema);
-        al->lexema[0] = '\0';
-        al->lexema_size = 0;   
-    } 
-    else {
-        t.lexema = NULL;
-    }
-
-    switch (atributo) {
-
-        case TOKEN_INT:
-            setInt(al, al->lexema);
-            t.valor.int_val = al->int_;
-            break;
-
-        case TOKEN_FLOAT:
-            if (strchr(al->lexema, 'E') || strchr(al->lexema, 'e')) {
-                setExp(al, al->lexema);
-                t.valor.float_val = al->float_;
-            } else {
-                setFloat(al, al->lexema);
-                t.valor.float_val = al->float_;
-            }
-            break;
-
-        case TOKEN_CHAR:
-            setChar(al, al->lexema);
-            t.valor.char_val = al->char_; 
-            break;
-            
-        default:
-            // Para outros tipos, os valores não são utilizados
-            memset(&t.valor, 0, sizeof(t.valor));
-            break;
-    }
-
-    return t;
-}
+#include "lexer.h"
+#include "token.h"
 
 // Função para inicializar o analisador léxico
 AnalisadorLexico* inicializarAnalisadorLexico(const char* filepath) {
@@ -268,6 +158,54 @@ int isLetterOrDigitOrUnderline(char c) {
     return isalnum(c) || c == '_';
 }
 
+// Função para criar um token
+Token criarToken(TipoToken tipo, TipoAtributo atributo, AnalisadorLexico* al) {
+    Token t;
+    t.tipo_token = tipo;
+    t.tipo_atributo = atributo;
+    t.posCol = al->posCol;
+    t.posRow = al->posRow;
+
+    if (al->lexema != NULL) {
+        t.lexema = strdup(al->lexema);
+        al->lexema[0] = '\0';
+        al->lexema_size = 0;   
+    } 
+    else {
+        t.lexema = NULL;
+    }
+
+    switch (atributo) {
+
+        case TOKEN_INT:
+            setInt(al, al->lexema);
+            t.valor.int_val = al->int_;
+            break;
+
+        case TOKEN_FLOAT:
+            if (strchr(al->lexema, 'E') || strchr(al->lexema, 'e')) {
+                setExp(al, al->lexema);
+                t.valor.float_val = al->float_;
+            } else {
+                setFloat(al, al->lexema);
+                t.valor.float_val = al->float_;
+            }
+            break;
+
+        case TOKEN_CHAR:
+            setChar(al, al->lexema);
+            t.valor.char_val = al->char_; 
+            break;
+            
+        default:
+            // Para outros tipos, os valores não são utilizados
+            memset(&t.valor, 0, sizeof(t.valor));
+            break;
+    }
+
+    return t;
+}
+
 int proximoToken(AnalisadorLexico* al, Token* token) {
     char c;
     al->state = 0;
@@ -305,62 +243,62 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                     if(c == '\n'){
                         al->posRow++;
                         al->posCol = 0;
-                        al->state = 102;
+                        al->state = 101;
                     }
                     else{
-                        al->state = 102;
+                        al->state = 101;
                     }
                 }
                 else if (isdigit(c)) {
-                    al->state = 66; // Número inteiro
+                    al->state = 65; // Número inteiro
                 }
                 else if (c == '\'') {
-                    al->state = 75; // Caractere
+                    al->state = 74; // Caractere
                 }
                 else if (c == '<'){
-                    al->state = 52;
+                    al->state = 51;
                 } 
                 else if (c == '='){
-                    al->state = 56;
+                    al->state = 55;
                 } 
                 else if (c == '+'){
-                    al->state = 60;
+                    al->state = 59;
                 } 
                 else if (c == '-'){
-                    al->state = 61;
+                    al->state = 60;
                 } 
                 else if (c == '/'){
-                    al->state = 62;
+                    al->state = 61;
                 } 
                 else if (c == '*'){
-                    al->state = 63;
+                    al->state = 62;
                 }
                 else if (c == ')'){
-                    al->state = 86;
+                    al->state = 85;
                 }
                 else if (c == '('){
-                    al->state = 87;
+                    al->state = 86;
                 }
                 else if (c == ']'){
-                    al->state = 88;
+                    al->state = 87;
                 } 
                 else if (c == '['){
-                    al->state = 89;
+                    al->state = 88;
                 } 
                 else if (c == '%'){
-                    al->state = 90;
+                    al->state = 89;
                 }
                 else if (c == ':'){
-                    al->state = 92;
+                    al->state = 91;
                 } 
                 else if (c == ';'){
-                    al->state = 95;
+                    al->state = 94;
                 } 
                 else if (c == ','){
-                    al->state = 96;
+                    al->state = 95;
                 }
                 else if (c == '{'){
-                    al->state = 97;
+                    al->state = 96;
                 }   
                 else {
                     al->state = 49;
@@ -785,145 +723,151 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (id != NULL) {
                     strcpy(id, al->lexema);
                 }
-                if (!symTable.hasLexema(id)) {
-                    symTable.add(token, id);
-                }
+                // if (!symTable.hasLexema(id)) {
+                //     symTable.add(token, id);
+                // }
                 return 1;
-            case 52:
+            case 51:
                 c = proxChar(al);
                 if (c == '=') {
-                    al->state = 53;
+                    al->state = 52;
                 } else if (c == '>') {
-                    al->state = 54;
+                    al->state = 53;
                 } else {
-                    al->state = 55;
+                    al->state = 54;
                 }
                 break;
-            case 53:
+            case 52:
                 *token = criarToken(TOKEN_RELOP, LE, al);
                 return 1;
-            case 54:
+            case 53:
                 *token = criarToken(TOKEN_RELOP, NE, al);
                 return 1;
-            case 55:
+            case 54:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_RELOP, LT, al);
                 return 1;
-            case 56:
+            case 55:
                 *token = criarToken(TOKEN_RELOP, EQ, al);
                 return 1;
-            case 57:
+            case 56:
                 c = proxChar(al);
                 if (c == '=') {
-                    al->state = 58;
+                    al->state = 57;
                 } else {
-                    al->state = 59;
+                    al->state = 58;
                 }
                 break;
-            case 58:
+            case 57:
                 *token = criarToken(TOKEN_RELOP, GE, al);
                 return 1;
-            case 59:
+            case 58:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_RELOP, GT, al);
                 return 1;
-            case 60:
+            case 59:
                 *token = criarToken(TOKEN_ARITOP, ADD, al);
                 return 1;
-            case 61:
+            case 60:
                 *token = criarToken(TOKEN_ARITOP, SUB, al);
                 return 1;
-            case 62:
+            case 61:
                 *token = criarToken(TOKEN_ARITOP, DIV, al);
                 return 1;
-            case 63:
+            case 62:
                 c = proxChar(al);
                 if (c == '*') {
-                    al->state = 64;
+                    al->state = 63;
                 } else{
-                    al->state = 65;
+                    al->state = 64;
                 }
                 break;
-            case 64:
+            case 63:
                 *token = criarToken(TOKEN_ARITOP, EXP, al);
                 return 1;
-            case 65:
+            case 64:
                 fixLookAhead(al, c);
-                *token = criarToken(TOKEN_RELOP, MULT, al);
+                *token = criarToken(TOKEN_ARITOP, MULT, al);
                 return 1;
-            case 86:
+            case 85:
                 *token = criarToken(TOKEN_PARENTESES_D, null, al);
                 return 1; 
-            case 87:
+            case 86:
                 *token = criarToken(TOKEN_PARENTESES_E, null, al);
                 return 1;
-            case 88:
+            case 87:
                 *token = criarToken(TOKEN_COLCHETE_D, null, al);
                 return 1;
-            case 89:
+            case 88:
                 *token = criarToken(TOKEN_COLCHETE_E, null, al);
                 return 1;
-            case 90:
+            case 89:
                 c = proxChar(al);
                 if (c == '}') {
-                    al->state = 91;
+                    al->state = 90;
                 }
                 break;
-            case 91: 
+            case 90: 
                 *token = criarToken(TOKEN_FECHAMENTO, null, al);
                 return 1;
-            case 92:
+            case 91:
                 c = proxChar(al);
                 if (c == '=')
                 {
-                    al->state = 94;
-                }else {
                     al->state = 93;
+                }else {
+                    al->state = 92;
                 }
                 break;
-            case 93:
+            case 92:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_D_PONTOS, null, al);
                 return 1;
-            case 94:
+            case 93:
                 *token = criarToken(TOKEN_ATRIB, null, al);
                 return 1;
 
-            case 95:
+            case 94:
                 *token = criarToken(TOKEN_P_VIRGULA, null, al);
                 return 1;
             
-            case 96:
+            case 95:
                 *token = criarToken(TOKEN_VIRGULA, null, al);
                 return 1;
 
+            case 96:
+                c = proxChar(al);
+                if (c == '#')
+                {
+                    al->state = 97;
+                }else if(c == '%') {
+                    al->state = 100;
+                }else{
+                   //erro 
+                }
+                break;
             case 97:
                 c = proxChar(al);
                 if (c == '#')
                 {
                     al->state = 98;
-                }else if(c == '%') {
-                    al->state = 101;
-                }else{
-                   //erro 
+                } else{
+                    al->state = 97;
                 }
-                break;
             case 98:
-                c = proxChar(al);
-                if (c == '#')
+                if (c == '}')
                 {
                     al->state = 99;
                 } else{
-                    al->state = 98;
-                }
-            case 99:
-                if (c == '}')
-                {
-                    al->state = 100;
-                } else{
                     //erro
                 }
-            case 102:
+            case 99:
+                //restart
+                break;
+            case 100:
+                *token = criarToken(TOKEN_ABERTURA, null, al);
+                return 1;
+            case 101:
                 c = proxChar(al);
 
                 if (c == '\n') {
@@ -931,10 +875,10 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                     al->posCol = 0;
                 } 
                 if (!(c == ' ' || c == '\t' || c == '\n')) {
-                    al->state = 103;
+                    al->state = 102;
                 }
                 break;
-            case 103:
+            case 102:
                 fixLookAhead(al, c);
                 restart(al);
                 break;
