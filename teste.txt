@@ -1,4 +1,2 @@
-<   >
-   :=
-if
-{%
+programa int
+float    

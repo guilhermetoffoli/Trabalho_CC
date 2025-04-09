@@ -2,6 +2,7 @@
 #define LEXER_H
 
 #include <stdio.h>
+#include <symtable.h>
 
 #define MAX_LEXEMA 100
 
@@ -33,7 +34,7 @@ Token;
 
 typedef struct {
     FILE *file;
-    //SymTable *symTable; 
+    SymTable *symTable; 
     char *lexema;
     size_t lexema_size;
     size_t lexema_capacity;

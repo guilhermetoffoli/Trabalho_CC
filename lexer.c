@@ -48,10 +48,10 @@ const char* getTipoAtributoName(TipoAtributo atributo) {
         case GE: return "MAIOR_IGUAL";
         case GT: return "MAIOR_QUE";
         case ADD: return "SOMA";
-        case SUB: return "SUBTRAÇÃO";
-        case DIV: return "DIVISÃO";
+        case SUB: return "SUBTRACAO";
+        case DIV: return "DIVISAO";
         case EXP: return "EXPONENCIAL";
-        case MULT: return "MULTIPLICAÇÃO";
+        case MULT: return "MULTIPLICACAO";
         default: return "UNKNOWN_ATTR";
     }
 }
@@ -189,17 +189,10 @@ static char proxChar(AnalisadorLexico* al) {
     }   
 
     if (c != EOF) {
-        if(!isspace(c)){
-            al->lexema[al->lexema_size++] = (char)c;  // Adiciona ao lexema
-            al->lexema[al->lexema_size] = '\0';
-        }
+        al->lexema[al->lexema_size++] = (char)c;  // Adiciona ao lexema
+        al->lexema[al->lexema_size] = '\0';
 
-        if (c == '\n') {
-            al->posRow++;
-            al->posCol = 0;
-        } else {
-            al->posCol++;
-        }
+        al->posCol++;
     }
     
     return (char)c;
@@ -212,17 +205,16 @@ static void fixLookAhead(AnalisadorLexico* al, char c) {
     
     ungetc(c, al->file);
 
-    if(isspace(al->lexema[al->lexema_size])){
-        al->lexema_size--;
-        al->lexema[al->lexema_size] = '\0';
-    }
+    al->lexema_size--;
+    al->lexema[al->lexema_size] = '\0';
 
-    if (c == '\n') {
-        al->posRow--;
-        al->posCol = 0;
-    } else {
-        al->posCol--;
-    }
+    al->posCol--;
+}
+
+static void restart(AnalisadorLexico* al){
+    al->state = 0;
+    al->lexema[0] = '\0';
+    al->lexema_size = 0;
 }
 
 void setInt(AnalisadorLexico* al, const char* lexema) {
@@ -301,20 +293,23 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                         al->state = 20;
                     } else if (c == 't') {
                         al->state = 25;
-                    } else if (c == 'i') {
-                        al->state = 30;
                     } else if (c == 'e') {
-                        al->state = 36;
+                        al->state = 32;
                     } else if (c == 'w') {
-                        al->state = 41;
+                        al->state = 40;
                     } else if (c == 'd') {  
-                        al->state = 47;
+                        al->state = 46;
                     }
                 }
                 else if (isspace(c)) {
-                    token->posCol = al->posCol; // Ignora espaços
-                    token->posRow = al->posRow;
-                    //al->state = 102;
+                    if(c == '\n'){
+                        al->posRow++;
+                        al->posCol = 0;
+                        al->state = 102;
+                    }
+                    else{
+                        al->state = 102;
+                    }
                 }
                 else if (isdigit(c)) {
                     al->state = 66; // Número inteiro
@@ -368,7 +363,7 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                     al->state = 97;
                 }   
                 else {
-                    al->state = 50;
+                    al->state = 49;
                 }
                 break;
             case 1:
@@ -376,9 +371,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'r') {
                     al->state = 2;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 2:
@@ -386,9 +381,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'o') {
                     al->state = 3;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 3:
@@ -396,9 +391,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'g') {
                     al->state = 4;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 4:
@@ -406,9 +401,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'r') {
                     al->state = 5;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 5:
@@ -416,9 +411,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'a') {
                     al->state = 6;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 6:
@@ -426,9 +421,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'm') {
                     al->state = 7;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 7:
@@ -436,16 +431,15 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'a') {
                     al->state = 8;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    printf("Entrou 7");
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 8:
                 c = proxChar(al);
                 if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
                     al->state = 9;
                 }
@@ -458,10 +452,12 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 c = proxChar(al);
                 if (c == 'n') {
                     al->state = 11;
+                } else if(c == 'f') {
+                    al->state = 30;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 11:
@@ -469,15 +465,15 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 't') {
                     al->state = 12;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 12:
                 c = proxChar(al);
                 if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
                     al->state = 13;
                 }
@@ -491,9 +487,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'l') {
                     al->state = 15;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 15:
@@ -501,9 +497,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if(c == 'o') {
                     al->state = 16;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 16:
@@ -511,9 +507,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'a') {
                     al->state = 17;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 17:
@@ -521,15 +517,15 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 't') {
                     al->state = 18;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 18:
                 c = proxChar(al);
                 if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
                     al->state = 19;
                 }
@@ -543,9 +539,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'h') {
                     al->state = 21;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 21:
@@ -553,9 +549,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'a') {
                     al->state = 22;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 22:
@@ -563,15 +559,15 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'r') {
                     al->state = 23;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 23:
                 c = proxChar(al);
                 if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
                     al->state = 24;
                 }
@@ -585,9 +581,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'h') {
                     al->state = 26;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 26:
@@ -595,9 +591,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'e') {
                     al->state = 27;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 27:
@@ -605,15 +601,15 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 if (c == 'n') {
                     al->state = 28;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 28:
                 c = proxChar(al);
                 if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
                     al->state = 29;
                 }
@@ -624,182 +620,175 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 return 1;
             case 30:
                 c = proxChar(al);
-                if (c == 'i'){
+                if (isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
+                } else {
                     al->state = 31;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
-                } else
-                {
-                    al->state = 51;
                 }
                 break;
             case 31:
-                c = proxChar(al);
-                if (c == 'f'){
-                    al->state = 32;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
-                } else {
-                    al->state = 51;
-                }
-                break;
-            case 32:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_IF, null, al);
                 return 1;
+            case 32:
+                c = proxChar(al);
+                if (c == 'l'){
+                    al->state = 33;
+                } else if(isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
+                } else {
+                    al->state = 50;
+                }
+                break;
             case 33:
                 c = proxChar(al);
-                if (c == 'f'){
+                if (c == 's'){
                     al->state = 34;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
+                } else if(isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
+                } else {
                     al->state = 50;
-                } 
-                    else {
-                    al->state = 51;
                 }
                 break;
             case 34:
                 c = proxChar(al);
-                if (c == 'f'){
+                if (c == 'e'){
                     al->state = 35;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
+                } else if(isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 35:
-                fixLookAhead(al, c);
-                *token = criarToken(TOKEN_IF, null, al);
-                return 1;
-            case 36:
-                c = proxChar(c);
-                if (c == 'e'){
-                    al->state = 37;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
+                c = proxChar(al);
+                if (c == 'i'){
+                    al->state = 36;
+                } else if(isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 39;
+                }
+                break;
+            case 36:
+                c = proxChar(al);
+                if (c == 'f'){
+                    al->state = 37;
+                } else if(isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
+                } else {
+                    al->state = 50;
                 }
                 break;
             case 37:
-                c = proxChar(c);
-                if (c == 'l'){
-                    al->state = 38;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
+                c = proxChar(al);
+                if (isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 38;
                 }
                 break;
             case 38:
-                c = proxChar(c);
-                if (c == 's'){
-                    al->state = 39;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
-                } else {
-                    al->state = 51;
-                }
-                break;
+                fixLookAhead(al, c);
+                *token = criarToken(TOKEN_ELSEIF, null, al);
+                return 1;
             case 39:
-                c = proxChar(c);
-                if (c == 'e'){
-                    al->state = 40;
-                } else if(isLetterOrDigitOrUnderline(c))
-                {
-                    al->state = 50;
-                } else {
-                    al->state = 51;
-                }
-                break;
-            case 40:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_ELSE, null, al);
                 return 1;
-            case 41:
+            case 40:
                 c = proxChar(al);
                 if (c == 'h') {
+                    al->state = 41;
+                } else if (isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
+                } else {
+                    al->state = 50;
+                }
+                break;
+            case 41:
+                c = proxChar(al);
+                if (c == 'i') {
                     al->state = 42;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 42:
                 c = proxChar(al);
-                if (c == 'i') {
+                if (c == 'l') {
                     al->state = 43;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 43:
                 c = proxChar(al);
-                if (c == 'l') {
-                    al->state = 43;
+                if (c == 'e') {
+                    al->state = 44;
                 } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 50;
                 }
                 break;
             case 44:
                 c = proxChar(al);
-                if (c == 'e') {
-                    al->state = 43;
-                } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                if (isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 45;
                 }
                 break;
             case 45:
-                c = proxChar(al);
-                if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
-                } else {
-                    al->state = 46;
-                }
-                break;
-            case 46:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_WHILE, null, al);
                 return 1;
+            case 46:
+                c = proxChar(al);
+                if (c == 'o') {
+                    al->state = 47;
+                } else if (isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
+                } else {
+                    al->state = 50;
+                }
+                break;
             case 47:
                 c = proxChar(al);
-                if (c == 'O') {
-                    al->state = 48;
-                } else if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
+                if (isLetterOrDigitOrUnderline(c)) {
+                    al->state = 49;
                 } else {
-                    al->state = 51;
+                    al->state = 48;
                 }
                 break;
             case 48:
-                c = proxChar(al);
-                if (isLetterOrDigitOrUnderline(c)) {
-                    al->state = 50;
-                } else {
-                    al->state = 49;
-                }
-                break;
-            case 49:
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_DO, null, al);
                 return 1;
-            case 50:
 
+            case 49:
+                c = proxChar(al);
+                if (!isLetterOrDigitOrUnderline(c)) {
+                    al->state = 50;
+                }
+                break;
+            case 50:
+                fixLookAhead(al, c);
+                *token = criarToken(TOKEN_ID, null, al);
+
+                char* id = malloc(strlen(al->lexema) + 1);
+                if (id != NULL) {
+                    strcpy(id, al->lexema);
+                }
+                if (!symTable.hasLexema(id)) {
+                    symTable.add(token, id);
+                }
+                return 1;
             case 52:
                 c = proxChar(al);
                 if (c == '=') {
@@ -935,16 +924,20 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                     //erro
                 }
             case 102:
-                if (isspace(c)){
-                    al->state = 102;
-                } else {
+                c = proxChar(al);
+
+                if (c == '\n') {
+                    al->posRow++;
+                    al->posCol = 0;
+                } 
+                if (!(c == ' ' || c == '\t' || c == '\n')) {
                     al->state = 103;
                 }
+                break;
             case 103:
                 fixLookAhead(al, c);
-                // Restart();
-                // *token = criarToken(TOKEN_VIRGULA, null, al);
-                return 1;
+                restart(al);
+                break;
             }
         }
 }
