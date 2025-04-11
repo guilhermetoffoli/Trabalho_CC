@@ -36,8 +36,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/lucas/OneDrive/Documentos/Trabalho_CC",
-      "program": "c:/Users/lucas/OneDrive/Documentos/Trabalho_CC/build/Debug/outDebug",
+      "cwd": "${workspaceFolder}",
+      "program": "${workspaceFolder}/output/teste.exe",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
@@ -45,8 +45,14 @@
           "description": "Enable pretty-printing for gdb",
           "text": "-enable-pretty-printing",
           "ignoreFailures": true
-        }
-      ]
+      },
+      {
+          "description": "Set Disassembly Flavor to Intel",
+          "text": "-gdb-set disassembly-flavor intel",
+          "ignoreFailures": true
+      }
+      ],
+      "preLaunchTask": "build"
     }
   ]
 }

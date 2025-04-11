@@ -21,7 +21,7 @@ typedef struct {
 SymTableEntry;
 
 typedef struct {
-    SymTableEntry** entries;  // Array de entradas
+    SymTableEntry *entries;  // Array de entradas
     int capacity;             // Capacidade atual
     int size;                 // Número de entradas
 } 
@@ -47,6 +47,8 @@ void symTableAddFloat(SymTable* table, Token* token, const char* lexema, float v
 
 // Adiciona uma entrada com valor char
 void symTableAddChar(SymTable* table, Token* token, const char* lexema, char valor);
+
+void imprimirTabelaSimbolos(SymTable* table);
 
 // Obtém uma entrada da tabela
 SymTableEntry* symTableGet(SymTable* table, const char* lexema);

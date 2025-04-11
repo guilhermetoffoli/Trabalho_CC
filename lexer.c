@@ -17,7 +17,7 @@ AnalisadorLexico* inicializarAnalisadorLexico(const char* filepath) {
         return NULL;
     }
 
-    //al->symTable = criarSymTable();
+    al->symTable = criarSymTable();
     al->posCol = 0;
     al->posRow = 0;
     al->state = 0;
@@ -58,9 +58,9 @@ void destruirAnalisadorLexico(AnalisadorLexico *al) {
         if (al->lexema != NULL) {
             free(al->lexema);
         }
-        //if (al->symTable != NULL) {
-        //    destruirSymTable(al->symTable);
-        //}
+        if (al->symTable != NULL) {
+            destruirSymTable(al->symTable);
+        }
         free(al);
     }
 }
@@ -107,35 +107,35 @@ static void restart(AnalisadorLexico* al){
     al->lexema_size = 0;
 }
 
-void setInt(AnalisadorLexico* al, const char* lexema) {
-    al->int_ = atoi(lexema);
+void setInt(AnalisadorLexico* al) {
+    al->int_ = atoi(al->lexema);
 }
 
-void setExp(AnalisadorLexico* al, const char* lexema) {
+void setExp(AnalisadorLexico* al) {
     float base, exp;
 
-    if (sscanf(lexema, "%fE%f", &base, &exp) == 2 || sscanf(lexema, "%fe%f", &base, &exp) == 2) {
+    if (sscanf(al->lexema, "%fe%f", &base, &exp) == 2) {
         al->float_ = base * powf(10.0f, exp);
     } 
     else {
-        al->float_ = atof(lexema);  // Fallback
+        al->float_ = atof(al->lexema);  // Fallback
     }
 }
 
-void setFloat(AnalisadorLexico* al, const char* lexema) {
-    al->float_ = atof(lexema);
+void setFloat(AnalisadorLexico* al) {
+    al->float_ = atof(al->lexema);
 }
 
-void setChar(AnalisadorLexico* al, const char* lexema) {
+void setChar(AnalisadorLexico* al) {
     // Verificação básica de formatação
-    if (strlen(lexema) < 3 || lexema[0] != '\'' || lexema[strlen(lexema)-1] != '\'') {
+    if (strlen(al->lexema) < 3 || al->lexema[0] != '\'' || al->lexema[strlen(al->lexema)-1] != '\'') {
         al->char_ = '\0';  // Caractere inválido
         return;
     }
 
     // Remove as aspas simples
     char temp[4] = {0};
-    strncpy(temp, lexema + 1, strlen(lexema) - 2);
+    strncpy(temp, al->lexema + 1, strlen(al->lexema) - 2);
 
     // Tratamento de caracteres de escape
     if (temp[0] == '\\') {
@@ -167,9 +167,7 @@ Token criarToken(TipoToken tipo, TipoAtributo atributo, AnalisadorLexico* al) {
     t.posRow = al->posRow;
 
     if (al->lexema != NULL) {
-        t.lexema = strdup(al->lexema);
-        al->lexema[0] = '\0';
-        al->lexema_size = 0;   
+        t.lexema = strdup(al->lexema); 
     } 
     else {
         t.lexema = NULL;
@@ -177,23 +175,23 @@ Token criarToken(TipoToken tipo, TipoAtributo atributo, AnalisadorLexico* al) {
 
     switch (atributo) {
 
-        case TOKEN_INT:
-            setInt(al, al->lexema);
+        case INT:
+            setInt(al);
             t.valor.int_val = al->int_;
             break;
 
-        case TOKEN_FLOAT:
-            if (strchr(al->lexema, 'E') || strchr(al->lexema, 'e')) {
-                setExp(al, al->lexema);
+        case FLOAT:
+            if (strchr(al->lexema, 'e')) {
+                setExp(al);
                 t.valor.float_val = al->float_;
             } else {
-                setFloat(al, al->lexema);
+                setFloat(al);
                 t.valor.float_val = al->float_;
             }
             break;
 
-        case TOKEN_CHAR:
-            setChar(al, al->lexema);
+        case CHAR:
+            setChar(al);
             t.valor.char_val = al->char_; 
             break;
             
@@ -203,6 +201,8 @@ Token criarToken(TipoToken tipo, TipoAtributo atributo, AnalisadorLexico* al) {
             break;
     }
 
+    al->lexema[0] = '\0';
+    al->lexema_size = 0;  
     return t;
 }
 
@@ -237,6 +237,8 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                         al->state = 40;
                     } else if (c == 'd') {  
                         al->state = 46;
+                    } else{
+                        al->state = 49;
                     }
                 }
                 else if (isspace(c)) {
@@ -418,7 +420,7 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 break;
             case 13:
                 fixLookAhead(al, c);
-                *token = criarToken(TOKEN_TIPO, TOKEN_INT, al);
+                *token = criarToken(TOKEN_TIPO, INT, al);
                 return 1;
             case 14:
                 c = proxChar(al);
@@ -470,7 +472,7 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 break;
             case 19:
                 fixLookAhead(al, c);
-                *token = criarToken(TOKEN_TIPO, TOKEN_FLOAT, al);
+                *token = criarToken(TOKEN_TIPO, FLOAT, al);
                 return 1; 
             case 20:
                 c = proxChar(al);
@@ -512,7 +514,7 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 break;
             case 24:
                 fixLookAhead(al, c);
-                *token = criarToken(TOKEN_TIPO, TOKEN_CHAR, al);
+                *token = criarToken(TOKEN_TIPO, CHAR, al);
                 return 1;
             case 25:
                 c = proxChar(al);
@@ -719,13 +721,11 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_ID, null, al);
 
-                char* id = malloc(strlen(al->lexema) + 1);
-                if (id != NULL) {
-                    strcpy(id, al->lexema);
+                if (!symTableHasLexema(al->symTable, token->lexema)) {
+                    Token* token_copy = malloc(sizeof(Token));
+                    memcpy(token_copy, token, sizeof(Token));
+                    symTableAdd(al->symTable, token_copy, token->lexema);
                 }
-                // if (!symTable.hasLexema(id)) {
-                //     symTable.add(token, id);
-                // }
                 return 1;
             case 51:
                 c = proxChar(al);
@@ -789,6 +789,193 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 fixLookAhead(al, c);
                 *token = criarToken(TOKEN_ARITOP, MULT, al);
                 return 1;
+            case 65:
+                c = proxChar(al);
+                if (c == '.') {
+                    al->state = 67; 
+                } else if (c == 'e') {
+                    al->state = 70;
+                } else if (!isdigit(c)) {
+                    al->state = 66;
+                }
+                break;
+            case 66:
+                fixLookAhead(al, c);
+                *token = criarToken(TOKEN_NUM, INT, al);
+                
+                if (!symTableHasLexema(al->symTable, token->lexema)) {
+                    Token* token_copy = malloc(sizeof(Token));
+                    memcpy(token_copy, token, sizeof(Token));
+                    symTableAddInt(al->symTable, token_copy, token->lexema, token->valor.int_val);
+                }
+                return 1;
+            case 67:
+                c = proxChar(al);
+                if (isdigit(c)) {
+                    al->state = 68;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 68:
+                c = proxChar(al);
+                if (c == 'e') {
+                    al->state = 70;
+                } else if (!isdigit(c)) {
+                    al->state = 69;
+                }
+                break;
+            case 69:
+                fixLookAhead(al, c);
+                *token = criarToken(TOKEN_NUM, FLOAT, al);
+
+                if (!symTableHasLexema(al->symTable, token->lexema)) {
+                    Token* token_copy = malloc(sizeof(Token));
+                    memcpy(token_copy, token, sizeof(Token));
+                    symTableAddFloat(al->symTable, token_copy, token->lexema, token->valor.float_val);
+                }
+                return 1;
+            case 70:
+                c = proxChar(al);
+                if (c == '+' || c == '-') {
+                    al->state = 71;
+                } else if (isdigit(c)) {
+                    al->state = 72;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 71:
+                c = proxChar(al);
+                if (isdigit(c)) {
+                    al->state = 72;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 72:
+                c = proxChar(al);
+                if (!isdigit(c)) {
+                    al->state = 73;
+                }
+                break;
+            case 73:
+                fixLookAhead(al, c);
+                *token = criarToken(TOKEN_NUM, FLOAT, al);
+
+                if (!symTableHasLexema(al->symTable, token->lexema)) {
+                    Token* token_copy = malloc(sizeof(Token));
+                    memcpy(token_copy, token, sizeof(Token));
+                    symTableAddFloat(al->symTable, token_copy, token->lexema, token->valor.float_val);
+                }
+                return 1;
+            case 74:
+                c = proxChar(al);
+                if (c == '\\') {
+                    al->state = 77;
+                } else if (c == '\'') {
+                    al->state = 76;
+                } else {
+                    al->state = 75;
+                }
+                break;
+            case 75:
+                c = proxChar(al);
+                if (c == '\'') {
+                    al->state = 76;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 76:
+                *token = criarToken(TOKEN_CHAR, CHAR, al);
+
+                if (!symTableHasLexema(al->symTable, token->lexema)) {
+                    Token* token_copy = malloc(sizeof(Token));
+                    memcpy(token_copy, token, sizeof(Token));
+                    symTableAddChar(al->symTable, token_copy, token->lexema, token->valor.char_val);
+                }
+                return 1;
+            case 77:
+                c = proxChar(al);
+                if (c == 'a' || c == 'b' || c == 'f' || c == 'n' || c == 'r' || c == 't' || c == 'v' || c == '\'' || c == '\\') {
+                    al->state = 78;
+                } else if (c == 'u') {
+                    al->state = 80;
+                } else if (c > 0 && c < 377) {
+                    al->state = 79;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 78:
+                c = proxChar(al);
+                if (c == '\'') {
+                    al->state = 76;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 79:
+                c = proxChar(al);
+                if (c == '\'') {
+                    al->state = 76;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 80:
+                c = proxChar(al);
+                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                    al->state = 81;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 81:
+                c = proxChar(al);
+                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                    al->state = 82;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 82:
+                c = proxChar(al);
+                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                    al->state = 83;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 83:
+                c = proxChar(al);
+                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
+                    al->state = 84;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
+            case 84:
+                c = proxChar(al);
+                if (c == '\'') {
+                    al->state = 82;
+                } else {
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
+                }
+                break;
             case 85:
                 *token = criarToken(TOKEN_PARENTESES_D, null, al);
                 return 1; 
@@ -837,8 +1024,7 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
 
             case 96:
                 c = proxChar(al);
-                if (c == '#')
-                {
+                if (c == '#') {
                     al->state = 97;
                 }else if(c == '%') {
                     al->state = 100;
@@ -848,21 +1034,19 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 break;
             case 97:
                 c = proxChar(al);
-                if (c == '#')
-                {
+                if (c == '#') {
                     al->state = 98;
-                } else{
+                } else {
                     al->state = 97;
                 }
             case 98:
-                if (c == '}')
-                {
+                if (c == '}') {
                     al->state = 99;
                 } else{
-                    //erro
+                    al->state = 97;
                 }
             case 99:
-                //restart
+                restart(al);
                 break;
             case 100:
                 *token = criarToken(TOKEN_ABERTURA, null, al);

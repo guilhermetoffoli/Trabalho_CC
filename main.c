@@ -43,6 +43,8 @@ int main(int argc, char *argv[]) {
         freeToken(&token);
     }
 
+    printf("\nTabela de Simbolos\n");
+    imprimirTabelaSimbolos(al->symTable);
     
     //AnalisadorSintatico* as = criarAnalisadorSintatico();
     

@@ -28,6 +28,9 @@ const char* getTipoTokenName(TipoToken tipo) {
         case TOKEN_VIRGULA: return "VIRGULA";
         case TOKEN_ATRIB: return "ATRIBUIÇÃO";
         case TOKEN_ID: return "ID";
+        case TOKEN_NUM: return "NUM";
+        case TOKEN_CHAR: return "CHAR";
+        case TOKEN_ERROR: return "ERROR";
         default: return "UNKNOWN_TOKEN";
     }
 }
@@ -35,9 +38,9 @@ const char* getTipoTokenName(TipoToken tipo) {
 const char* getTipoAtributoName(TipoAtributo atributo) {
     switch(atributo) {
         case null: return "null";
-        case TOKEN_INT: return "TOKEN_INT";
-        case TOKEN_FLOAT: return "TOKEN_FLOAT";
-        case TOKEN_CHAR: return "TOKEN_CHAR";
+        case INT: return "TOKEN_INT";
+        case FLOAT: return "TOKEN_FLOAT";
+        case CHAR: return "TOKEN_CHAR";
         case LE: return "MENOR_IGUAL";
         case NE: return "DIFERENÇA";
         case LT: return "MENOR_QUE";

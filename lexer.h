@@ -25,9 +25,9 @@ AnalisadorLexico* inicializarAnalisadorLexico(const char* filepath);
 int proximoToken(AnalisadorLexico* al, Token* token);
 Token criarToken(TipoToken tipo, TipoAtributo atributo, AnalisadorLexico* al);
 void destruirAnalisadorLexico(AnalisadorLexico *al);
-void setInt(AnalisadorLexico* al, const char* lexema);
-void setExp(AnalisadorLexico* al, const char* lexema);
-void setFloat(AnalisadorLexico* al, const char* lexema);
-void setChar(AnalisadorLexico* al, const char* lexema);
+void setInt(AnalisadorLexico* al);
+void setExp(AnalisadorLexico* al);
+void setFloat(AnalisadorLexico* al);
+void setChar(AnalisadorLexico* al);
 
 #endif // LEXER_H

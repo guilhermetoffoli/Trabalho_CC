@@ -1,1 +1,1 @@
-{%%}
+{# Verifica se idade é # maior que 20 #}
