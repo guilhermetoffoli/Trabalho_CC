@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "lexer.h"
 #include "token.h"
+#include "analisador_sintatico.h"
 
 int main(int argc, char *argv[]) {
 
@@ -51,6 +52,11 @@ int main(int argc, char *argv[]) {
     // Liberar memória dos analisadores
     destruirAnalisadorLexico(al);
     //destruirAnalisadorSintatico(as);
+
+    printf("Iniciando analise sintatica...\n\n");
+
+    inicializa_tabela();
+    analisador_sintatico(argv[1]);
     
     return 0;
 }

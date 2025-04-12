@@ -17,8 +17,8 @@ const char* getTipoTokenName(TipoToken tipo) {
         case TOKEN_DO: return "DO";
         case TOKEN_RELOP: return "RELOP";
         case TOKEN_ARITOP: return "ARITOP";
-        case TOKEN_PARENTESES_D: return "PARÊNTESES DIREITO";
-        case TOKEN_PARENTESES_E: return "PARÊNTESES ESQUERDO";
+        case TOKEN_PARENTESES_D: return "PARENTESE_D";
+        case TOKEN_PARENTESES_E: return "PARENTESE_E";
         case TOKEN_COLCHETE_D: return "COLCHETE DIREITO";
         case TOKEN_COLCHETE_E: return "COLCHETE ESQUERDO";
         case TOKEN_ABERTURA: return "ABERTURA";
