@@ -28,12 +28,14 @@ void destruirSymTable(SymTable* table) {
     if (!table) 
         return;
     
+    // Libera os lexemas e tokens de cada entrada
     for (int i = 0; i < table->size; i++) {
-        free(table[i].entries->lexema);
-        free(table[i].entries->token);
-        free(table[i].entries);
+        free(table->entries[i].lexema);
+        free(table->entries[i].token);
     }
     
+    table->size = 0;
+    // Libera o array de entradas
     free(table->entries);
     free(table);
 }

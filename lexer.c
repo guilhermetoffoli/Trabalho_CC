@@ -260,6 +260,9 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 else if (c == '<'){
                     al->state = 51;
                 } 
+                else if(c == '>'){
+                    al->state = 56;
+                }
                 else if (c == '='){
                     al->state = 55;
                 } 
@@ -1029,7 +1032,8 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 }else if(c == '%') {
                     al->state = 100;
                 }else{
-                   //erro 
+                    *token = criarToken(TOKEN_ERROR, null, al);
+                    return -1;
                 }
                 break;
             case 97:
@@ -1039,12 +1043,15 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 } else {
                     al->state = 97;
                 }
+                break;
             case 98:
+                c = proxChar(al);
                 if (c == '}') {
                     al->state = 99;
                 } else{
                     al->state = 97;
                 }
+                break;
             case 99:
                 restart(al);
                 break;
