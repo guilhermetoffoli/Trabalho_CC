@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
-#define NAO_TERMINAIS 21
-#define TERMINAIS 23      
-#define VAZIO -1
+#include "tabela.h"
 
 int tabela[NAO_TERMINAIS][TERMINAIS];
 
@@ -17,13 +14,13 @@ const char* nao_terminais[] = {
 
 const char* terminais[] = {
     "programa", "ID", "IF", "WHILE", "ABERTURA", "DO", "TIPO", "FECHAMENTO", "ELSEIF", "ELSE",
-    "NUM", "CHAR", "PARENTESE_D", "ADD", "SUB", "MULT", "DIV", "EXP", "RELOP",
-    "COLCHETE_E", "VIRGULA", "P_VIRGULA", "$"
+    "NUM", "CHAR", "PARENTESE_D", "PARENTESE_E", "ADD", "SUB", "MULT", "DIV", "EXP", "RELOP",
+    "COLCHETE_E", "VIRGULA", "P_VIRGULA", "$", "THEN"
 };
 
 int indice_terminal(const char* simbolo) {
     for (int i = 0; i < TERMINAIS; i++) {
-        if (strcmp(simbolo, terminais[i]) == 0)
+        if (strcasecmp(simbolo, terminais[i]) == 0)
             return i;
     }
     return -1;
@@ -31,7 +28,7 @@ int indice_terminal(const char* simbolo) {
 
 int indice_nao_terminal(const char* simbolo) {
     for (int i = 0; i < NAO_TERMINAIS; i++) {
-        if (strcmp(simbolo, nao_terminais[i]) == 0)
+        if (strcasecmp(simbolo, nao_terminais[i]) == 0)
             return i;
     }
     return -1;
@@ -41,7 +38,7 @@ void inicializa_tabela(){
 
     for (int i = 0; i < NAO_TERMINAIS; i++) {
         for (int j = 0; j < TERMINAIS; j++) {
-            tabela[i][j] = VAZIO;
+            tabela[i][j] = -1;
         }
     }
 
@@ -54,6 +51,8 @@ void inicializa_tabela(){
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("IF")] = 4;
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("WHILE")] = 4;
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("DO")] = 4;
+    tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("FECHAMENTO")] = 4;
+
 
     tabela[indice_nao_terminal("listaIDs")][indice_terminal("ID")] = 5;
 
@@ -64,6 +63,8 @@ void inicializa_tabela(){
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("IF")] = 8;
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("WHILE")] = 8;
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("DO")] = 8;
+    tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("FECHAMENTO")] = 10;
+
 
     tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("ID")] = 9;
     tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("IF")] = 9;
@@ -150,7 +151,15 @@ void inicializa_tabela(){
 int obter_producao(const char* nao_terminal, const char* terminal) {
     int i = indice_nao_terminal(nao_terminal);
     int j = indice_terminal(terminal);
-    if (i == -1 || j == -1) return VAZIO;
+    if (i == -1 || j == -1) return -1; // nao tem producao
     return tabela[i][j];
 }
 
+int eh_terminal(const char* simbolo) {
+    for (int i = 0; i < TERMINAIS; i++) {
+        if (strcasecmp(simbolo, terminais[i]) == 0) {
+            return 1; // É terminal
+        }
+    }
+    return 0; // Não é terminal (então é não-terminal)
+}
