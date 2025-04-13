@@ -1,15 +1,4 @@
 programa main() {%
-    
-    int : i;
 
-    i := 0;
-
-    while [i < 5] do {%
-        i := i + 1;
-    %}
-    do {%
-        i := i - 1;
-    %}
-    while [i > 0] ;
 
 %}

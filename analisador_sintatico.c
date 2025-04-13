@@ -7,13 +7,11 @@ void trata_producao(Pilha *p, ArvoreBin *arvore, Node *pai, int producao_index) 
 
     printf("\nEmpilhando producao %d:\n", producao_index);
 
-    // Contar número real de símbolos
     int tamanho = 0;
     while (producao[tamanho] != NULL && strcmp(producao[tamanho], "") != 0) {
         tamanho++;
     }
 
-    // Empilhar de trás pra frente
     for (int i = tamanho - 1; i >= 0; i--) {
         if(strcmp(producao[i], "ε") != 0){
             empilha(p, (char*)producao[i]);
@@ -38,9 +36,15 @@ void analisador_sintatico(const char* filepath){
     const char* proxToken = getTipoTokenName(token_atual.tipo_token);
 
     ArvoreBin *arv = cria_arvore();
-    Node *no_atual;
+
+    Node *no_atual = (Node *)malloc(sizeof(Node));
+    if (no_atual == NULL) {
+        fprintf(stderr, "Erro ao alocar memória para nó raiz.\n");
+        exit(EXIT_FAILURE);
+    }
 
     strcpy(no_atual->token, "iniciaPrograma");
+    no_atual->qntd_filhos = 0;
     *arv = no_atual;
 
     while(!pilha_vazia(p)){
@@ -69,16 +73,12 @@ void analisador_sintatico(const char* filepath){
                 return;
             } else{
                 desempilha(p);
-                // Cria novo nó na AST para X (não-terminal expandido)
-                Node *novo_no = malloc(sizeof(Node));
-                strcpy(novo_no->token, X);
-                novo_no->qntd_filhos = 0;
-
                 inserir_novo_no(no_atual, X);
+                Node *novo_no = no_atual->filhos[no_atual->qntd_filhos - 1]; 
 
                 trata_producao(p, arv, novo_no, producao);
 
-                no_atual = novo_no; 
+                no_atual = novo_no;
             }
         }
     }
