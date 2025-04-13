@@ -5,17 +5,17 @@
 int tabela[NAO_TERMINAIS][TERMINAIS];
 
 const char* nao_terminais[] = {
-    "iniciaPrograma", "bloco", "declaracaoVariavel", "listaIDs", "listaIDs'", 
-    "sequenciaComandos", "sequenciaComandos'", "comando", "comandoSelecao",
+    "iniciaPrograma", "bloco", "declaracaoVariavel", "listaIDs", "listaIDs_linha", 
+    "sequenciaComandos", "sequenciaComandos_linha", "comando", "comandoSelecao",
     "BlocoElseIfs", "ElseIfCondicao", "BlocoElse", "comandoRepeticao",
-    "corpo", "condicao", "comandoAtribuicao", "expressao", "expressao'",
-    "termo", "termo'", "fator"
+    "corpo", "condicao", "comandoAtribuicao", "expressao", "expressao_linha",
+    "termo", "termo_linha", "fator"
 };
 
 const char* terminais[] = {
     "programa", "ID", "IF", "WHILE", "ABERTURA", "DO", "TIPO", "FECHAMENTO", "ELSEIF", "ELSE",
     "NUM", "CHAR", "PARENTESE_D", "PARENTESE_E", "ADD", "SUB", "MULT", "DIV", "EXP", "RELOP",
-    "COLCHETE_E", "VIRGULA", "P_VIRGULA", "$", "THEN"
+    "COLCHETE_E", "VIRGULA", "P_VIRGULA", "$", "THEN", "D_PONTOS", "COLCHETE_D", "ATRIB", "ARITOP"
 };
 
 int indice_terminal(const char* simbolo) {
@@ -47,17 +47,18 @@ void inicializa_tabela(){
     tabela[indice_nao_terminal("bloco")][indice_terminal("ABERTURA")] = 2;
 
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("TIPO")] = 3;
-    tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("ID")] = 4;
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("IF")] = 4;
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("WHILE")] = 4;
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("DO")] = 4;
     tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("FECHAMENTO")] = 4;
 
+    // NOVO
+    tabela[indice_nao_terminal("declaracaoVariavel")][indice_terminal("ID")] = 25;
 
     tabela[indice_nao_terminal("listaIDs")][indice_terminal("ID")] = 5;
 
-    tabela[indice_nao_terminal("listaIDs'")][indice_terminal("VIRGULA")] = 6;
-    tabela[indice_nao_terminal("listaIDs'")][indice_terminal("P_VIRGULA")] = 7;
+    tabela[indice_nao_terminal("listaIDs_linha")][indice_terminal("VIRGULA")] = 6;
+    tabela[indice_nao_terminal("listaIDs_linha")][indice_terminal("P_VIRGULA")] = 7;
 
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("ID")] = 8;
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("IF")] = 8;
@@ -65,17 +66,25 @@ void inicializa_tabela(){
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("DO")] = 8;
     tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("FECHAMENTO")] = 10;
 
+    // NOVO
+    tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("TIPO")] = 43;
 
-    tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("ID")] = 9;
-    tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("IF")] = 9;
-    tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("WHILE")] = 9;
-    tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("DO")] = 9;
-    tabela[indice_nao_terminal("sequenciaComandos'")][indice_terminal("FECHAMENTO")] = 10;
+    tabela[indice_nao_terminal("sequenciaComandos_linha")][indice_terminal("ID")] = 9;
+    tabela[indice_nao_terminal("sequenciaComandos_linha")][indice_terminal("IF")] = 9;
+    tabela[indice_nao_terminal("sequenciaComandos_linha")][indice_terminal("WHILE")] = 9;
+    tabela[indice_nao_terminal("sequenciaComandos_linha")][indice_terminal("DO")] = 9;
+    tabela[indice_nao_terminal("sequenciaComandos_linha")][indice_terminal("FECHAMENTO")] = 10;
+
+    // NOVO
+    tabela[indice_nao_terminal("sequenciaComandos_linha")][indice_terminal("P_VIRGULA")] = 40;
 
     tabela[indice_nao_terminal("comando")][indice_terminal("IF")] = 11;
     tabela[indice_nao_terminal("comando")][indice_terminal("WHILE")] = 12;
     tabela[indice_nao_terminal("comando")][indice_terminal("DO")] = 12;
     tabela[indice_nao_terminal("comando")][indice_terminal("ID")] = 13;
+
+    //NOVO
+    tabela[indice_nao_terminal("comando")][indice_terminal("ABERTURA")] = 2;
 
     tabela[indice_nao_terminal("comandoSelecao")][indice_terminal("IF")] = 14;
 
@@ -117,35 +126,55 @@ void inicializa_tabela(){
     tabela[indice_nao_terminal("expressao")][indice_terminal("CHAR")] = 26;
     tabela[indice_nao_terminal("expressao")][indice_terminal("PARENTESE_D")] = 26;
 
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("ADD")] = 27;
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("SUB")] = 28;
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("ID")] = 29;
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("IF")] = 29;
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("WHILE")] = 29;
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("DO")] = 29;
-    tabela[indice_nao_terminal("expressao'")][indice_terminal("FECHAMENTO")] = 29;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("ADD")] = 27;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("SUB")] = 28;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("ID")] = 29;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("IF")] = 29;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("WHILE")] = 29;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("DO")] = 29;
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("FECHAMENTO")] = 29;
+
+    // NONO
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("ARITOP")] = 42;
+
+    // NOVO
+    tabela[indice_nao_terminal("expressao_linha")][indice_terminal("P_VIRGULA")] = 29;
 
     tabela[indice_nao_terminal("termo")][indice_terminal("ID")] = 30;
     tabela[indice_nao_terminal("termo")][indice_terminal("NUM")] = 30;
     tabela[indice_nao_terminal("termo")][indice_terminal("CHAR")] = 30;
     tabela[indice_nao_terminal("termo")][indice_terminal("PARENTESE_D")] = 30;
 
-    tabela[indice_nao_terminal("termo'")][indice_terminal("MULT")] = 31;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("DIV")] = 32;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("EXP")] = 33;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("RELOP")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("COLCHETE_E")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("ADD")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("FECHAMENTO")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("DO")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("WHILE")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("IF")] = 34;
-    tabela[indice_nao_terminal("termo'")][indice_terminal("ID")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("MULT")] = 31;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("DIV")] = 32;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("EXP")] = 33;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("RELOP")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("COLCHETE_E")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("COLCHETE_D")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("ADD")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("FECHAMENTO")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("DO")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("WHILE")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("IF")] = 34;
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("ID")] = 34;
+
+    // // NOVO
+    // tabela[indice_nao_terminal("termo_linha")][indice_terminal("ATRIB")] = 41;
+
+    // NOVO
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("ARITOP")] = 34;
+
+    // NOVO
+    tabela[indice_nao_terminal("termo_linha")][indice_terminal("P_VIRGULA")] = 34;
+    
+    // NOVO
+    tabela[indice_nao_terminal("sequenciaComandos")][indice_terminal("P_VIRGULA")] = 39;
 
     tabela[indice_nao_terminal("fator")][indice_terminal("ID")] = 35;
     tabela[indice_nao_terminal("fator")][indice_terminal("NUM")] = 36;
     tabela[indice_nao_terminal("fator")][indice_terminal("CHAR")] = 37;
     tabela[indice_nao_terminal("fator")][indice_terminal("PARENTESE_D")] = 38;
+
 }
 
 int obter_producao(const char* nao_terminal, const char* terminal) {

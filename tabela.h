@@ -5,7 +5,7 @@
 #include <string.h>
 
 #define NAO_TERMINAIS 21
-#define TERMINAIS 23      
+#define TERMINAIS 29 
 
 int tabela[NAO_TERMINAIS][TERMINAIS];
 
