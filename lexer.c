@@ -907,10 +907,6 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 c = proxChar(al);
                 if (c == 'a' || c == 'b' || c == 'f' || c == 'n' || c == 'r' || c == 't' || c == 'v' || c == '\'' || c == '\\') {
                     al->state = 78;
-                } else if (c == 'u') {
-                    al->state = 80;
-                } else if (c > 0 && c < 377) {
-                    al->state = 79;
                 } else {
                     *token = criarToken(TOKEN_ERROR, null, al);
                     return -1;
@@ -920,60 +916,6 @@ int proximoToken(AnalisadorLexico* al, Token* token) {
                 c = proxChar(al);
                 if (c == '\'') {
                     al->state = 76;
-                } else {
-                    *token = criarToken(TOKEN_ERROR, null, al);
-                    return -1;
-                }
-                break;
-            case 79:
-                c = proxChar(al);
-                if (c == '\'') {
-                    al->state = 76;
-                } else {
-                    *token = criarToken(TOKEN_ERROR, null, al);
-                    return -1;
-                }
-                break;
-            case 80:
-                c = proxChar(al);
-                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-                    al->state = 81;
-                } else {
-                    *token = criarToken(TOKEN_ERROR, null, al);
-                    return -1;
-                }
-                break;
-            case 81:
-                c = proxChar(al);
-                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-                    al->state = 82;
-                } else {
-                    *token = criarToken(TOKEN_ERROR, null, al);
-                    return -1;
-                }
-                break;
-            case 82:
-                c = proxChar(al);
-                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-                    al->state = 83;
-                } else {
-                    *token = criarToken(TOKEN_ERROR, null, al);
-                    return -1;
-                }
-                break;
-            case 83:
-                c = proxChar(al);
-                if (isdigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')) {
-                    al->state = 84;
-                } else {
-                    *token = criarToken(TOKEN_ERROR, null, al);
-                    return -1;
-                }
-                break;
-            case 84:
-                c = proxChar(al);
-                if (c == '\'') {
-                    al->state = 82;
                 } else {
                     *token = criarToken(TOKEN_ERROR, null, al);
                     return -1;
