@@ -2,7 +2,7 @@
 #define ARVORE_H
 
 #define MAX_CHAR 100
-#define MAX_NODES 20
+#define MAX_NODES 50
 
 typedef struct Node {
     char token[MAX_CHAR];

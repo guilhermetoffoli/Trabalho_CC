@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "arvore.h"
+#include "lexer.h"
 
 ArvoreBin *cria_arvore(){
     ArvoreBin *raiz = (ArvoreBin *) malloc(sizeof(ArvoreBin));
@@ -33,7 +34,7 @@ void libera_arvore(ArvoreBin *raiz){
 void inserir_novo_no(Node *no, char *valor){
 
     if(no == NULL || no->qntd_filhos >= MAX_NODES){
-        fprintf(stderr, "Erro: nó nulo ou máximo de filhos atingido.\n");
+        fprintf(stderr, "Erro: no nulo ou maximo de filhos atingido.\n");
         return;
     }
 

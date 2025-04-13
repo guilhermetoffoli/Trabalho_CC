@@ -38,8 +38,10 @@ void analisador_sintatico(const char* filepath){
     const char* proxToken = getTipoTokenName(token_atual.tipo_token);
 
     ArvoreBin *arv = cria_arvore();
+    Node *no_atual;
 
-    Node *no_atual = *arv;
+    strcpy(no_atual->token, "iniciaPrograma");
+    *arv = no_atual;
 
     while(!pilha_vazia(p)){
         printf("\nToken atual: [%s]\n", proxToken);
@@ -72,7 +74,7 @@ void analisador_sintatico(const char* filepath){
                 strcpy(novo_no->token, X);
                 novo_no->qntd_filhos = 0;
 
-                // inserir_novo_no(no_atual, X); // adiciona X como filho do pai atual
+                inserir_novo_no(no_atual, X);
 
                 trata_producao(p, arv, novo_no, producao);
 
